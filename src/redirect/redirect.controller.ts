@@ -5,10 +5,6 @@ import { LinksService } from '../links/links.service';
 export class RedirectController {
   constructor(private readonly linksService: LinksService) {}
 
-  /**
-   * Handle redirects from the root URL
-   * e.g., /:shortCode instead of /links/:shortCode
-   */
   @Get(':shortCode')
   @Redirect()
   async redirect(@Param('shortCode') shortCode: string) {
