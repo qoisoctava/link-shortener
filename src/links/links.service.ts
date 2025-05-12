@@ -32,9 +32,9 @@ export class LinksService {
     return result;
   }
 
-  async create(createLinkDto: CreateLinkDto, user: User): Promise<Link> {
+  async create(createLinkDto: CreateLinkDto, user: User): Promise<any> {
     let shortCode = createLinkDto.customShortCode;
-
+  
     if (!shortCode) {
       do {
         shortCode = this.generateShortCode();
@@ -42,18 +42,24 @@ export class LinksService {
     } else {
       const existingLink = await this.findByShortCode(shortCode);
       if (existingLink) {
-        throw new ConflictException('Short code already exist!');
+        throw new ConflictException('Short code already exists');
       }
     }
-
-    // Create and save link to repository
+  
     const link = this.linksRepository.create({
       originalUrl: createLinkDto.originalUrl,
       shortCode,
       user,
     });
-
-    return this.linksRepository.save(link);
+  
+    const savedLink = await this.linksRepository.save(link);
+    
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    
+    return {
+      ...savedLink,
+      fullShortUrl: `${baseUrl}/${savedLink.shortCode}`
+    };
   }
 
   async findAllByUser(UserId: number): Promise<Link[]> {
